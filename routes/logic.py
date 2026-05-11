@@ -73,12 +73,22 @@ class RouteOptimizer:
             target_points = [p for p in points_with_dist if current_dist < p['dist'] <= must_stop_by]
             if not target_points: break
 
+            # Segment Optimization: Filter candidates near the current window for performance
+            segment_lats = [p['coord'][0] for p in target_points]
+            segment_lngs = [p['coord'][1] for p in target_points]
+            
+            segment_candidates = [
+                s for s in candidates 
+                if s.latitude is not None and s.longitude is not None
+                and min(segment_lats)-0.1 <= s.latitude <= max(segment_lats)+0.1
+                and min(segment_lngs)-0.1 <= s.longitude <= max(segment_lngs)+0.1
+            ]
+
             # Efficient lookup for stations near the segment
-            for station in candidates:
+            for station in segment_candidates:
                 s_coord = (station.latitude, station.longitude)
-                # Check distance against sampled points (every 10th for speed)
                 for p in target_points[::10]:
-                    if geodesic(s_coord, p['coord']).miles < 10:
+                    if geodesic(s_coord, p['coord']).miles < 20:
                         if station.retail_price < min_price:
                             min_price = station.retail_price
                             best_station = station

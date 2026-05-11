@@ -115,3 +115,10 @@ The optimizer utilizes a **Greedy Strategy with Windowed Selection**:
 - **Quick Results**: The API is optimized for speed, performing only 3 external network calls per request (2 for geocoding, 1 for routing).
 - **Human-Made**: The project avoids over-engineered "AI boilerplate" and focuses on clean, idiomatic Python.
 - **Data Handling**: Correctly handles unique `truckstop_id` constraints and currency precision using `Decimal` fields.
+
+## 🚀 Performance Optimizations
+
+- **Segment-Based Spatial Filtering**: Instead of querying all stations, the engine dynamically calculates a search corridor for each 500-mile segment of the trip.
+- **Bounding-Box Database Queries**: Utilizes latitude/longitude ranges to leverage database indexing and minimize in-memory processing.
+- **LRU Caching**: Geocoding (Nominatim) and Routing (OSRM) results are cached to minimize external API latency and respect rate limits.
+- **Route Sampling**: The engine samples points along the high-resolution polyline (every 10th point) to speed up distance calculations without sacrificing accuracy.
